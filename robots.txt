@@ -1,0 +1,26 @@
+User-agent: *
+Allow: /
+Disallow: /panel/
+Disallow: /talep.php
+
+# Yapay zekâ arama botları (GEO) – sitenizin yapay zekâ cevaplarında görünmesi için açık
+User-agent: GPTBot
+Allow: /
+Disallow: /panel/
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /panel/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /panel/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /panel/
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://netonarimtesisat.com.tr/sitemap.xml

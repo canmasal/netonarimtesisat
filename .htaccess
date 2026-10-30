@@ -1,0 +1,79 @@
+# ===== Net Onarım – sunucu ayarları (Apache / LiteSpeed) =====
+AddType font/woff .woff
+AddType font/woff2 .woff2
+Options -Indexes
+DirectoryIndex index.php
+ErrorDocument 404 /404.php
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # --- HTTPS ve www yönlendirmesi ---
+  # SSL kurulduktan sonra aşağıdaki 4 satırın başındaki # işaretlerini kaldırın.
+ RewriteCond %{HTTPS} off [OR]
+ RewriteCond %{HTTP_HOST} ^www\. [NC]
+ RewriteCond %{HTTP_HOST} ^(?:www\.)?(.+)$ [NC]
+ RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+
+  # index.php'yi ana adrese yönlendir (kopya içerik olmasın)
+  RewriteCond %{THE_REQUEST} \s/index\.php[\s?] [NC]
+  RewriteRule ^index\.php$ / [R=301,L]
+
+  # Eski sitedeki sayfaları yeni adreslere taşı (Google'daki değer korunur)
+  RewriteRule ^biz\.html$ /hakkimizda [R=301,L]
+  RewriteRule ^(iletisim|hakkimizda)\.html$ /$1 [R=301,L]
+  RewriteRule ^index\.html$ / [R=301,L]
+
+  # SEO dostu adresler
+  RewriteRule ^hakkimizda/?$ hakkimizda.php [L]
+  RewriteRule ^iletisim/?$ iletisim.php [L]
+  RewriteRule ^su-tesisatcisi/([a-z0-9-]+)/([a-z0-9-]+)/?$ mahalle.php?i=$1&m=$2 [L,QSA]
+ RewriteRule ^su-tesisatcisi/([a-z0-9-]+)/?$ bolge.php?s=$1 [L,QSA]
+ RewriteRule ^hizmet/([a-z0-9-]+)/?$ hizmet.php?s=$1 [L,QSA]
+ RewriteRule ^galeri/?$ galeri.php [L,QSA]
+ RewriteRule ^kvkk-aydinlatma-metni/?$ yasal.php?s=kvkk [L,QSA]
+ RewriteRule ^cerez-politikasi/?$ yasal.php?s=cerez [L,QSA]
+ RewriteRule ^blog/?$ blog.php [L,QSA]
+ RewriteRule ^blog/([a-z0-9-]+)/?$ blog.php?s=$1 [L,QSA]
+  RewriteRule ^sitemap\.xml$ sitemap.php [L]
+  RewriteRule ^llms\.txt$ llms.php [L]
+
+  # inc/ ve data/ klasörlerini kapat
+  RewriteRule ^(inc|data)(/|$) - [F,L]
+</IfModule>
+
+# Veritabanı ve yardımcı dosyaları koru
+<FilesMatch "\.(sqlite|sqlite-wal|sqlite-shm|db|bat|md)$|^(BENIOKU\.txt|router\.php)$">
+  <IfModule mod_authz_core.c>Require all denied</IfModule>
+  <IfModule !mod_authz_core.c>Deny from all</IfModule>
+</FilesMatch>
+
+# Tarayıcı önbelleği (hız = SEO)
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType font/woff "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType application/font-woff "access plus 1 year"
+  ExpiresByType application/x-font-woff "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+</IfModule>
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/xml text/plain application/json
+</IfModule>
+
+# Sunucu sayfa önbelleğini kapat (içerik panelden değişiyor). CSS/görseller tarayıcıda önbelleklenir.
+<IfModule LiteSpeed>
+  CacheDisable public /
+</IfModule>
+<IfModule mod_headers.c>
+  # Font, logo, görsel ve stiller 1 yıl tarayıcıda saklanır. Değiştiklerinde adresleri sürüm numarasıyla değişir.
+  <FilesMatch "\.(woff|woff2|svg|png|jpe?g|webp|css|js)$">
+    Header always set Cache-Control "public, max-age=31536000, immutable"
+    Header unset Pragma
+  </FilesMatch>
+</IfModule>
