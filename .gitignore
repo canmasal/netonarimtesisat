@@ -1,0 +1,8 @@
+# Sunucuya özel ayarlar ve canlı veriler depoya girmez
+inc/config.php
+data/*
+!data/.htaccess
+uploads/galeri/*
+!uploads/galeri/.gitkeep
+error_log
+*.zip

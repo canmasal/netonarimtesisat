@@ -1,0 +1,44 @@
+name: befhosting'e yükle
+
+# main dalına her push'ta değişen dosyaları FTP ile public_html'e gönderir.
+# Actions sekmesinden elle de çalıştırılabilir.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: befhosting-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kodu al
+        uses: actions/checkout@v4
+
+      - name: FTP ile public_html'e yükle
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ftp.netonarimtesisat.com.tr
+          username: netonznq
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          server-dir: public_html/
+          # Sunucudaki canlı veriler ve ayarlar asla ezilmez/silinmez:
+          #   inc/config.php  -> veritabanı yolu ve site ayarları (yalnızca sunucuda)
+          #   data/           -> SQLite veritabanı (talepler, panel içerikleri)
+          #   uploads/        -> panelden yüklenen galeri resimleri
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .github/**
+            README.md
+            inc/config.php
+            data/**
+            uploads/**
+            error_log
+            **/error_log
+            *.zip
